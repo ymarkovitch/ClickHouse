@@ -1,5 +1,8 @@
+cmake_minimum_required(VERSION 3.5)
 project (ClickHouse)
-cmake_minimum_required(VERSION 2.6)
+
+set(CXX_STANDARD 14 CACHE INTERNAL "" FORCE)
+set(CXX_STANDARD_REQUIRED YES CACHE INTERNAL "" FORCE)
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # require at least gcc 5
@@ -28,6 +31,13 @@ MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
 set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Debug;Release;MinSizeRel" CACHE STRING "" FORCE)
 
+# По умолчанию собираем полностью самодостаточные бинарии, вллючая статическую линковку
+# с glibc и libstdc++
+set(BUILD_STATIC_BINARIES ON CACHE BOOL
+  "Global flag to cause to create all libraries static and link all executables with static libc and libstdc++.")
+
+set(GLIBC_COMPATIBILITY FALSE CACHE BOOL "Set to TRUE to enable compatibility with older glibc libraries")
+
 IF (CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*)")
 	SET(AARCH64 1)
 ENDIF()
@@ -36,10 +46,7 @@ IF (NOT AARCH64)
 	SET(MACHINE_FLAGS "-msse4 -mpopcnt")
 ENDIF()
 
-SET(COMMON_WARNING_FLAGS "-Wall -Werror")
-
-
-set (GLIBC_COMPATIBILITY FALSE CACHE BOOL "Set to TRUE to enable compatibility with older glibc libraries")
+set(COMMON_WARNING_FLAGS "-Wall -Werror")
 
 if ($ENV{GLIBC_COMPATIBILITY})
 	set (GLIBC_COMPATIBILITY TRUE)
@@ -49,7 +56,6 @@ if (GLIBC_COMPATIBILITY)
 	SET(GLIBC_COMPATIBILITY_COMPILE_FLAGS   "-include ${ClickHouse_SOURCE_DIR}/libs/libcommon/include/common/glibc_compatibility.h")
 	SET(GLIBC_COMPATIBILITY_LINK_FLAGS      "-Wl,--wrap=memcpy")
 endif()
-
 
 SET(CMAKE_BUILD_COLOR_MAKEFILE          ON)
 SET(CMAKE_CXX_FLAGS "-std=gnu++1y ${COMMON_WARNING_FLAGS} -Wnon-virtual-dtor ${MACHINE_FLAGS} ${GLIBC_COMPATIBILITY_COMPILE_FLAGS}")
