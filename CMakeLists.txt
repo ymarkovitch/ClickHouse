@@ -1,11 +1,28 @@
 cmake_minimum_required(VERSION 3.5)
 project (ClickHouse)
 
+# Explicitly require C++14
 set(CXX_STANDARD 14 CACHE INTERNAL "" FORCE)
 set(CXX_STANDARD_REQUIRED YES CACHE INTERNAL "" FORCE)
 
+# Build statically-linked binaries by default (including static luinking with glibc and libstdc++)
+# Turn it OFF with -DBUILD_STATIC_BINARIES=OFF or through CMake GUI
+# Note this option forces BUILD_SHARED_LIBS
+set(BUILD_STATIC_BINARIES ON CACHE BOOL
+  "Global flag to cause to create all libraries static and link all executables with static libc and libstdc++.")
+
+if (BUILD_STATIC_BINARIES)
+  set(BUILD_SHARED_LIBS FALSE CACHE INTERNAL "" FORCE)
+  set(LINKER_STATIC_FLAGS "-static-libgcc -static-libstdc++")
+else()
+  unset(LINKER_STATIC_FLAGS)
+  set(BUILD_SHARED_LIBS TRUE CACHE INTERNAL "" FORCE)
+endif()
+
+# Check for compiler version requirements
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # require at least gcc 5
+    # Require at least gcc 5
+    # GCC completely supports C++14 starting from 5.1
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5)
         message(FATAL_ERROR "GCC version must be at least 5! For example, if GCC 5 is available under gcc-5, g++-5 names, do the following: export CC=gcc-5 CXX=g++-5; rm -rf CMakeCache.txt CMakeFiles; and re run cmake or ./release.")
     endif()
@@ -23,6 +40,14 @@ cmake_policy(SET CMP0014 OLD)
 
 cmake_policy(SET CMP0012 NEW) # Don't dereference TRUE and FALSE
 
+# Find requred Boost components
+find_package(Boost 1.53.0 REQUIRED COMPONENTS
+  filesystem
+  program_options
+  regex
+  system
+  thread)
+
 IF(NOT CMAKE_BUILD_TYPE)
 	message(STATUS "CMAKE_BUILD_TYPE is not set, set to default = RELWITHDEBINFO")
 	SET(CMAKE_BUILD_TYPE            "RELWITHDEBINFO")
@@ -30,11 +55,6 @@ ENDIF()
 MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
 set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Debug;Release;MinSizeRel" CACHE STRING "" FORCE)
-
-# По умолчанию собираем полностью самодостаточные бинарии, вллючая статическую линковку
-# с glibc и libstdc++
-set(BUILD_STATIC_BINARIES ON CACHE BOOL
-  "Global flag to cause to create all libraries static and link all executables with static libc and libstdc++.")
 
 set(GLIBC_COMPATIBILITY FALSE CACHE BOOL "Set to TRUE to enable compatibility with older glibc libraries")
 
@@ -64,7 +84,7 @@ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO      "-O3 -g")
 SET(CMAKE_C_FLAGS                       "${COMMON_WARNING_FLAGS} ${MACHINE_FLAGS} ${GLIBC_COMPATIBILITY_COMPILE_FLAGS}")
 SET(CMAKE_C_FLAGS_RELEASE               "-O3 -DNDEBUG")
 SET(CMAKE_C_FLAGS_RELWITHDEBINFO        "-O3 -g")
-SET(CMAKE_EXE_LINKER_FLAGS              "-static-libgcc -static-libstdc++ ${GLIBC_COMPATIBILITY_LINK_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS              "${LINKER_STATIC_FLAGS} ${GLIBC_COMPATIBILITY_LINK_FLAGS}")
 
 # cmake -DCMAKE_BUILD_TYPE=Debug ..
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")

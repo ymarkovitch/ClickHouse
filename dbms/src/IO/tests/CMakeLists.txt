@@ -67,7 +67,7 @@ target_link_libraries (io_operators dbms)
 add_executable (io_and_exceptions io_and_exceptions.cpp ${SRCS})
 
 add_executable(write_buffer_aio write_buffer_aio.cpp)
-target_link_libraries (write_buffer_aio dbms libboost_filesystem.a)
+target_link_libraries (write_buffer_aio dbms Boost::filesystem)
 
 add_executable(read_buffer_aio read_buffer_aio.cpp)
-target_link_libraries (read_buffer_aio dbms libboost_filesystem.a)
+target_link_libraries (read_buffer_aio dbms Boost::filesystem)

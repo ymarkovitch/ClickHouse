@@ -12,7 +12,7 @@ endif()
 if (${DISABLE_MONGODB})
 	add_definitions(-D DISABLE_MONGODB)
 else()
-	set (LINK_MONGOCLIENT libmongoclient.a libssl.a libcrypto.a)
+	set (LINK_MONGOCLIENT mongoclient ssl crypto)
 endif()
 
 add_library (dbms
@@ -958,14 +958,14 @@ target_link_libraries(dbms
 	double-conversion
 	${LINK_LIBRARIES_ONLY_ON_X86_64}
 	re2 re2_st
-	libcrypto.a
-	libboost_thread.a
-	libboost_system.a
+	crypto
+	Boost::thread
+	Boost::system
 	${LINK_MONGOCLIENT}
-	libboost_regex.a
+	Boost::regex
 	PocoData
 	PocoDataODBC
-	dl libltdl.a)
+	dl ltdl)
 
 add_dependencies (dbms
 	common

@@ -52,7 +52,7 @@ IF($ENV{DISABLE_LIBTCMALLOC})
 ELSE($ENV{DISABLE_LIBTCMALLOC})
 	IF($ENV{DEBUG_LIBTCMALLOC})
 		message(STATUS "Link libtcmalloc_minimal_debug for testing")
-		SET(MALLOC_LIBRARIES libtcmalloc_minimal_debug.a)
+		SET(MALLOC_LIBRARIES tcmalloc_minimal_debug)
 	ELSE($ENV{DEBUG_LIBTCMALLOC})
 		message(STATUS "Link libtcmalloc_minimal")
 		SET(MALLOC_LIBRARIES tcmalloc_minimal_internal)
@@ -64,9 +64,9 @@ target_link_libraries (
 	pocoext
 	${MALLOC_LIBRARIES}
 	pthread
-	libglib-2.0.a
-	libicui18n.a libicuuc.a libicudata.a
-	librt.a)
+	glib-2.0
+	icui18n icuuc icudata
+	rt)
 
 IF(TESTS)
 	add_subdirectory (src/tests)
