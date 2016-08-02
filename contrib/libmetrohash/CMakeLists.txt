@@ -4,7 +4,7 @@ IF (NOT AARCH64)	# Не используется. Портировать не с
 	SET(SOURCES_ONLY_ON_X86_64 src/metrohash128crc.cpp)
 ENDIF()
 
-add_library(metrohash
+add_library(metrohash STATIC
 	src/metrohash.h
 	src/testvector.h
 

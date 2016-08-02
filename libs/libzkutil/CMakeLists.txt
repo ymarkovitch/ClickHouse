@@ -1,4 +1,4 @@
-add_library(zkutil
+add_library(zkutil STATIC
 	src/ZooKeeper.cpp
 	src/Lock.cpp
 	src/SingleBarrier.cpp
@@ -16,6 +16,9 @@ add_library(zkutil
     include/zkutil/Types.h
     include/zkutil/ZooKeeperHolder.h)
 
-target_link_libraries(zkutil zookeeper pthread PocoFoundation)
+target_link_libraries(zkutil INTERFACE
+    zookeeper
+    PocoFoundation
+    -pthread)
 
 add_subdirectory (src)

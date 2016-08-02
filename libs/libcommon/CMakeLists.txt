@@ -11,7 +11,7 @@ set_source_files_properties(
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/src/)
 
-add_library (common
+add_library (common STATIC
 	src/DateLUT.cpp
 	src/DateLUTImpl.cpp
 	src/ClickHouseRevision.cpp
@@ -46,27 +46,29 @@ add_library (common
 	${REVISIONFILE}
 )
 
+add_library(malloc_library INTERFACE)
+
 # TESTIRT-3687 DISABLE_LIBTCMALLOC - when testing for memory leaks, disable libtcmalloc
 IF($ENV{DISABLE_LIBTCMALLOC})
-	message(STATUS "Disabling libtcmalloc for valgrind better analysis")
-ELSE($ENV{DISABLE_LIBTCMALLOC})
+        message(STATUS "Disabling libtcmalloc for valgrind better analysis")
+ELSE()
 	IF($ENV{DEBUG_LIBTCMALLOC})
 		message(STATUS "Link libtcmalloc_minimal_debug for testing")
-		SET(MALLOC_LIBRARIES tcmalloc_minimal_debug)
-	ELSE($ENV{DEBUG_LIBTCMALLOC})
+                target_link_libraries(malloc_library INTERFACE tcmalloc_minimal_debug)
+	ELSE()
 		message(STATUS "Link libtcmalloc_minimal")
-		SET(MALLOC_LIBRARIES tcmalloc_minimal_internal)
-	ENDIF($ENV{DEBUG_LIBTCMALLOC})
-ENDIF($ENV{DISABLE_LIBTCMALLOC})
+                target_link_libraries(malloc_library INTERFACE tcmalloc_minimal_internal)
+	ENDIF()
+ENDIF()
 
-target_link_libraries (
-	common
-	pocoext
-	${MALLOC_LIBRARIES}
-	pthread
-	glib-2.0
-	icui18n icuuc icudata
-	rt)
+target_link_libraries (common
+    INTERFACE
+
+    pocoext
+    malloc_library
+    glib-2.0
+    icui18n icuuc icudata
+    -pthread rt dl)
 
 IF(TESTS)
 	add_subdirectory (src/tests)

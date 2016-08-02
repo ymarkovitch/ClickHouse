@@ -1,4 +1,4 @@
-add_library (daemon
+add_library (daemon STATIC
 	src/BaseDaemon.cpp
 	src/GraphiteWriter.cpp
 

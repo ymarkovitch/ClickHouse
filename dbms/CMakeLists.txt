@@ -1,5 +1,6 @@
-include_directories(include)
-include_directories(/usr/include/mysql)
+include_directories (
+    include
+    ${MYSQL_INCLUDE_DIRS})
 
 add_subdirectory (src)
 
@@ -10,12 +11,26 @@ if ($ENV{DISABLE_MONGODB})
 endif()
 
 if (${DISABLE_MONGODB})
-	add_definitions(-D DISABLE_MONGODB)
+
+    add_library(mongodb_client INTERFACE)
+    target_compile_definitions(mongodb_client INTERFACE DISABLE_MONGODB)
+
 else()
-	set (LINK_MONGOCLIENT mongoclient ssl crypto)
+
+    check_include_file(mongo/client/dbclient.h MONGODB_CLIENT_FOUND)
+    if (NOT MONGODB_CLIENT_FOUND)
+        message(FATAL_ERROR "MongoDB client not found. Install MongoDB client or disable MongoDB support with -DDISABLE_MONGODB=TRUE")
+    endif()
+
+    add_library(mongodb_client INTERFACE)
+    target_link_libraries(mongodb_client INTERFACE mongoclient ssl crypto)
+    target_sources(mongodb_client INTERFACE
+        include/DB/Dictionaries/MongoDBBlockInputStream.h
+        include/DB/Dictionaries/MongoDBDictionarySource.h)
+
 endif()
 
-add_library (dbms
+add_library (dbms STATIC
 	src/Server/OLAPAttributesMetadata.h
 	src/Server/InterserverIOHTTPHandler.h
 	src/Server/OLAPHTTPHandler.h
@@ -294,8 +309,6 @@ add_library (dbms
 	include/DB/Dictionaries/IDictionary.h
 	include/DB/Dictionaries/MySQLBlockInputStream.h
 	include/DB/Dictionaries/MySQLDictionarySource.h
-	include/DB/Dictionaries/MongoDBBlockInputStream.h
-	include/DB/Dictionaries/MongoDBDictionarySource.h
 	include/DB/Dictionaries/ODBCBlockInputStream.h
 	include/DB/Dictionaries/ODBCDictionarySource.h
 	include/DB/Dictionaries/TypeCheckingBlockInputStream.h
@@ -913,60 +926,32 @@ add_library (dbms
 
 # Не генерируем отладочную информацию для файлов с большим количеством инстанцирований шаблонов
 # - для более быстрой линковки и меньшего размера бинарника.
-SET_SOURCE_FILES_PROPERTIES(
-	src/Functions/FunctionsArithmetic.cpp
-	src/Functions/FunctionsArray.cpp
-	src/Functions/FunctionsCoding.cpp
-	src/Functions/FunctionsComparison.cpp
-	src/Functions/FunctionsConditional.cpp
-	src/Functions/FunctionsConversion.cpp
-	src/Functions/FunctionsDateTime.cpp
-	src/Functions/FunctionsDictionaries.cpp
-	src/Functions/FunctionsFormatting.cpp
-	src/Functions/FunctionsHashing.cpp
-	src/Functions/FunctionsHigherOrder.cpp
-	src/Functions/FunctionsLogical.cpp
-	src/Functions/FunctionsRandom.cpp
-	src/Functions/FunctionsReinterpret.cpp
-	src/Functions/FunctionsRound.cpp
-	src/Functions/FunctionsString.cpp
-	src/Functions/FunctionsStringArray.cpp
-	src/Functions/FunctionsStringSearch.cpp
-	src/Functions/FunctionsURL.cpp
-	src/Functions/FunctionsVisitParam.cpp
-	src/Functions/FunctionsMath.cpp
-	src/Functions/FunctionsMiscellaneous.cpp
-	src/Functions/FunctionsTransform.cpp
-	src/Dictionaries/FlatDictionary.cpp
-	src/Dictionaries/HashedDictionary.cpp
-	src/Dictionaries/CacheDictionary.cpp
-	src/Dictionaries/RangeHashedDictionary.cpp
-	src/Dictionaries/ComplexKeyHashedDictionary.cpp
-	src/Dictionaries/ComplexKeyCacheDictionary.cpp
-	PROPERTIES COMPILE_FLAGS -g0)
-
-IF (NOT AARCH64)
-	SET(LINK_LIBRARIES_ONLY_ON_X86_64 cpuid)
-ENDIF()
+file(GLOB FUNCTION_SOURCES   LIST_DIRECTORIES FALSE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/Functions/Functions*.cpp)
+file(GLOB DICTIONARY_SOURCES LIST_DIRECTORIES FALSE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/Dictionaries/*Dictionary.cpp)
+set_source_files_properties(
+    ${FUNCTION_SOURCES}
+    ${DICTIONARY_SOURCES}
+    PROPERTIES
+    COMPILE_FLAGS -g0)
 
 target_link_libraries(dbms
+    PUBLIC
+
 	common
 	zkutil
 	mysqlxx
 	cityhash farmhash metrohash
 	lz4 zstd
 	double-conversion
-	${LINK_LIBRARIES_ONLY_ON_X86_64}
 	re2 re2_st
 	crypto
 	Boost::thread
 	Boost::system
-	${LINK_MONGOCLIENT}
 	Boost::regex
 	PocoData
 	PocoDataODBC
-	dl ltdl)
 
-add_dependencies (dbms
-	common
-	zkutil)
+        mongodb_client
+        $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},"x86_64">:cpuid>
+
+	dl ltdl)

@@ -1,4 +1,4 @@
-add_library (zstd
+add_library (zstd STATIC
 include/zstd/entropy_common.c
 include/zstd/fse_compress.c
 include/zstd/fse_decompress.c

@@ -5,7 +5,7 @@ add_definitions(
 
 include_directories (include/zookeeper src)
 
-add_library (zookeeper
+add_library (zookeeper STATIC
 src/zookeeper.c
 src/zookeeper.jute.c
 src/zk_hashtable.c

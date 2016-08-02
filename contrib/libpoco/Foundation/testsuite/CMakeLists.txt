@@ -2,7 +2,7 @@ set(TESTUNIT "${LIBNAME}-testrunner")
 
 # Sources
 file(GLOB SRCS_G "src/*.cpp")
-file(GLOB SRCS_G_REMOVE 
+file(GLOB SRCS_G_REMOVE
     src/TestApp.cpp
     src/TestApp_WINCE.cpp
     src/TestLibrary.cpp
@@ -28,10 +28,7 @@ add_executable( ${TESTUNIT} ${TEST_SRCS} )
 add_test(NAME ${LIBNAME} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COMMAND ${TESTUNIT} -all)
 set_tests_properties(${LIBNAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=.") # The SharedLibaryTest has to look for shared libraries in the working directory
 
-target_link_libraries( ${TESTUNIT} PocoFoundation CppUnit )
-if(UNIX)
-    target_link_libraries( ${TESTUNIT} pthread)
-endif(UNIX)
+target_link_libraries( ${TESTUNIT} PocoFoundation CppUnit $<${UNIX}:-pthread> )
 
 # The test is run in the runtime directory. So the test data is copied there too
 add_custom_command(TARGET ${TESTUNIT} POST_BUILD
@@ -56,4 +53,3 @@ set_target_properties( TestLibrary PROPERTIES PREFIX "" DEBUG_POSTFIX "") # The 
 set_target_properties( TestLibrary PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 target_link_libraries( TestLibrary PocoFoundation )
 endif()
-

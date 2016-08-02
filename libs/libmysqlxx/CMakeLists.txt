@@ -1,4 +1,4 @@
-add_library (mysqlxx
+add_library (mysqlxx STATIC
 	src/Connection.cpp
 	src/Query.cpp
 	src/ResultBase.cpp
@@ -22,18 +22,16 @@ add_library (mysqlxx
 	include/mysqlxx/Types.h
 	include/mysqlxx/UseQueryResult.h
 	include/mysqlxx/Value.h
-)
+        )
 
-add_dependencies (mysqlxx common)
-
-target_link_libraries (mysqlxx common mysqlclient ssl crypto z dl)
-
-ADD_CUSTOM_COMMAND(
-    TARGET mysqlxx
-    POST_BUILD
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patch.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Patching mysqlclient library.")
+target_link_libraries (mysqlxx
+    PUBLIC
+    ${MYSQL_LIB}
+    common
+    ssl
+    crypto
+    z
+    dl)
 
 IF(TESTS)
 	add_subdirectory (src/tests)

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project (ClickHouse)
 
+# Append our module directory to CMake
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 # Explicitly require C++14
 set(CXX_STANDARD 14 CACHE INTERNAL "" FORCE)
 set(CXX_STANDARD_REQUIRED YES CACHE INTERNAL "" FORCE)
@@ -47,6 +50,12 @@ find_package(Boost 1.53.0 REQUIRED COMPONENTS
   regex
   system
   thread)
+
+# Find MySQL client libraries
+find_package(MySQL REQUIRED)
+if (NOT MYSQL_FOUND)
+    message(FATAL_ERROR "MySQL client library not found, it is required for build.")
+endif()
 
 IF(NOT CMAKE_BUILD_TYPE)
 	message(STATUS "CMAKE_BUILD_TYPE is not set, set to default = RELWITHDEBINFO")

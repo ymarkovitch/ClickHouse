@@ -1,6 +1,6 @@
 include_directories (include src)
 
-add_library(cityhash
+add_library(cityhash STATIC
 	src/city.cc
 
 	include/citycrc.h

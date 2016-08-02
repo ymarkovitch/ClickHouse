@@ -1,4 +1,4 @@
-add_library(cpuid
+add_library(cpuid STATIC
 include/cpuid/asm-bits.c
 include/cpuid/cpuid_main.c
 include/cpuid/libcpuid_util.c

@@ -1,4 +1,4 @@
-add_library (lz4
+add_library (lz4 STATIC
     src/lz4.c
     src/lz4hc.c
 

@@ -41,8 +41,8 @@ SET(re2_headers
 
 add_definitions( -DNDEBUG )
 
-add_library (re2 ${re2_headers})
-add_library (re2_st ${re2_headers})
+add_library (re2 STATIC ${re2_headers})
+add_library (re2_st STATIC ${re2_headers})
 
 set_target_properties(re2_st PROPERTIES COMPILE_DEFINITIONS "NO_THREADS;re2=re2_st")
 
