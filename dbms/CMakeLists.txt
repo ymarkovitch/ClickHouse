@@ -952,6 +952,6 @@ target_link_libraries(dbms
 	PocoDataODBC
 
         mongodb_client
-        $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},"x86_64">:cpuid>
+        $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86_64>:cpuid>
 
 	dl ltdl)
