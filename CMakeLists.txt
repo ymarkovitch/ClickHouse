@@ -72,7 +72,7 @@ IF (CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*)")
 ENDIF()
 
 IF (NOT AARCH64)
-	SET(MACHINE_FLAGS "-msse4 -mpopcnt")
+	SET(MACHINE_FLAGS "-march=corei7")
 ENDIF()
 
 set(COMMON_WARNING_FLAGS "-Wall -Werror")
@@ -89,10 +89,10 @@ endif()
 SET(CMAKE_BUILD_COLOR_MAKEFILE          ON)
 SET(CMAKE_CXX_FLAGS "-std=gnu++1y ${COMMON_WARNING_FLAGS} -Wnon-virtual-dtor ${MACHINE_FLAGS} ${GLIBC_COMPATIBILITY_COMPILE_FLAGS}")
 SET(CMAKE_CXX_FLAGS_RELEASE             "-O3 -DNDEBUG")
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO      "-O3 -g")
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO      "-O2 -g")
 SET(CMAKE_C_FLAGS                       "${COMMON_WARNING_FLAGS} ${MACHINE_FLAGS} ${GLIBC_COMPATIBILITY_COMPILE_FLAGS}")
 SET(CMAKE_C_FLAGS_RELEASE               "-O3 -DNDEBUG")
-SET(CMAKE_C_FLAGS_RELWITHDEBINFO        "-O3 -g")
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO        "-O2 -g")
 SET(CMAKE_EXE_LINKER_FLAGS              "${LINKER_STATIC_FLAGS} ${GLIBC_COMPATIBILITY_LINK_FLAGS}")
 
 # cmake -DCMAKE_BUILD_TYPE=Debug ..
@@ -116,7 +116,7 @@ IF(TESTS)
 ENDIF(TESTS)
 
 # Префикс для установки
-SET(CMAKE_INSTALL_PREFIX /usr)
+SET(CMAKE_INSTALL_PREFIX /usr CACHE STRING "Installation prefix")
 
 include_directories (${ClickHouse_SOURCE_DIR}/contrib/libcityhash/include/)
 include_directories (${ClickHouse_SOURCE_DIR}/contrib/liblz4/include/)
@@ -171,7 +171,20 @@ link_directories (/usr/local/lib)
 # Directory for Yandex specific files
 SET(CLICKHOUSE_PRIVATE_DIR ${ClickHouse_SOURCE_DIR}/private/)
 
+# Temporary disable "install"
+macro(install)
+    if (DEFINED CMAKE_DISABLE_INSTALL)
+        message(STATUS "Skip install for ${CMAKE_CURRENT_SOURCE_DIR}")
+    else()
+        _install(${ARGV})
+    endif()
+endmacro()
+
+# Disable "install" for all contrib libraries
+set(CMAKE_DISABLE_INSTALL TRUE)
 add_subdirectory (contrib)
+unset(CMAKE_DISABLE_INSTALL)
+
 add_subdirectory (libs)
 add_subdirectory (utils)
 add_subdirectory (dbms)
