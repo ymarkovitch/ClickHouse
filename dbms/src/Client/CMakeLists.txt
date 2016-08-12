@@ -24,10 +24,10 @@ add_executable(clickhouse-benchmark Benchmark.cpp)
 target_link_libraries (clickhouse-client dbms ${LINE_EDITING_LIBS} Boost::program_options)
 target_link_libraries (clickhouse-benchmark dbms Boost::program_options)
 
-INSTALL(TARGETS clickhouse-client RUNTIME DESTINATION bin COMPONENT clickhouse-client)
-INSTALL(FILES config.xml DESTINATION /etc/clickhouse-client  COMPONENT clickhouse-client)
+install(TARGETS clickhouse-client RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT clickhouse-client)
+install(FILES config.xml DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/clickhouse-client"  COMPONENT clickhouse-client)
 
-INSTALL(TARGETS clickhouse-benchmark RUNTIME DESTINATION bin  COMPONENT clickhouse-benchmark)
+install(TARGETS clickhouse-benchmark RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT clickhouse-benchmark)
 
 IF(TESTS)
 	add_subdirectory (tests)

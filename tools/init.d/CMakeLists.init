@@ -37,7 +37,7 @@ add_custom_target(${daemonname}-init.target ALL
 )
 INSTALL(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${tmp_file_name}
-    DESTINATION /etc/init.d
+    DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/init.d"
     RENAME ${filename}
     PERMISSIONS OWNER_EXECUTE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
     COMPONENT ${daemonname}

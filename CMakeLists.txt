@@ -4,6 +4,9 @@ project (ClickHouse)
 # Append our module directory to CMake
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Use GNUInstallDirs to get canonical paths
+include(GNUInstallDirs)
+
 # Explicitly require C++14
 set(CXX_STANDARD 14 CACHE INTERNAL "" FORCE)
 set(CXX_STANDARD_REQUIRED YES CACHE INTERNAL "" FORCE)

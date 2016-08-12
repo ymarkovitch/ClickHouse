@@ -17,7 +17,7 @@ add_custom_target(${daemonname}-logrotate.target ALL
 )
 INSTALL(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${daemonname}.logrt
-    DESTINATION /etc/logrotate.d
+    DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/logrotate.d"
     PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
     COMPONENT ${daemonname}
 )

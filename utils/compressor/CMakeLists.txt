@@ -1,7 +1,7 @@
 add_executable (compressor main.cpp)
 target_link_libraries (compressor dbms Boost::program_options)
 
-INSTALL(TARGETS compressor RUNTIME DESTINATION bin COMPONENT compressor)
+install(TARGETS compressor RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT compressor)
 
 
 add_executable (zstd_test zstd_test.cpp)
